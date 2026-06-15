@@ -1,0 +1,341 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Game Hub</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+    }
+
+    /* Background particles */
+    .bg-particles {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 0;
+      overflow: hidden;
+    }
+
+    .particle {
+      position: absolute;
+      width: 4px;
+      height: 4px;
+      background: rgba(255, 255, 255, 0.15);
+      border-radius: 50%;
+      animation: float linear infinite;
+    }
+
+    @keyframes float {
+      0% {
+        transform: translateY(100vh) rotate(0deg);
+        opacity: 0;
+      }
+      10% { opacity: 1; }
+      90% { opacity: 1; }
+      100% {
+        transform: translateY(-10vh) rotate(720deg);
+        opacity: 0;
+      }
+    }
+
+    .container {
+      position: relative;
+      z-index: 1;
+      text-align: center;
+      padding: 40px 20px;
+      max-width: 1100px;
+      width: 100%;
+    }
+
+    .hub-title {
+      font-size: 3.5rem;
+      font-weight: 800;
+      background: linear-gradient(45deg, #f7971e, #ffd200, #f7971e);
+      background-size: 200% auto;
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      margin-bottom: 10px;
+      letter-spacing: 3px;
+      animation: shimmer 3s linear infinite;
+    }
+
+    @keyframes shimmer {
+      0% { background-position: 0% center; }
+      100% { background-position: 200% center; }
+    }
+
+    .hub-subtitle {
+      font-size: 1.1rem;
+      color: rgba(255, 255, 255, 0.5);
+      margin-bottom: 50px;
+      letter-spacing: 1px;
+    }
+
+    .games-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 30px;
+      padding: 0 10px;
+    }
+
+    .game-card {
+      position: relative;
+      background: linear-gradient(145deg, rgba(255,255,255,0.08), rgba(255,255,255,0.02));
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 24px;
+      padding: 40px 30px;
+      text-decoration: none;
+      color: #fff;
+      transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+      cursor: pointer;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 16px;
+      backdrop-filter: blur(10px);
+    }
+
+    .game-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(135deg, transparent 40%, rgba(255,255,255,0.05));
+      pointer-events: none;
+    }
+
+    .game-card:hover {
+      transform: translateY(-10px);
+      border-color: rgba(255, 255, 255, 0.3);
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.4);
+    }
+
+    .game-card:active {
+      transform: translateY(-5px) scale(0.98);
+    }
+
+    .game-card .glow {
+      position: absolute;
+      top: -50%;
+      left: -50%;
+      width: 200%;
+      height: 200%;
+      background: radial-gradient(circle at 50% 50%, rgba(255,255,255,0.03), transparent 60%);
+      opacity: 0;
+      transition: opacity 0.4s;
+      pointer-events: none;
+    }
+
+    .game-card:hover .glow {
+      opacity: 1;
+    }
+
+    .game-icon {
+      font-size: 4rem;
+      line-height: 1;
+      filter: drop-shadow(0 0 20px rgba(255, 255, 255, 0.1));
+      transition: transform 0.4s;
+    }
+
+    .game-card:hover .game-icon {
+      transform: scale(1.1) rotate(-5deg);
+    }
+
+    .game-name {
+      font-size: 1.6rem;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+    }
+
+    .game-desc {
+      font-size: 0.9rem;
+      color: rgba(255, 255, 255, 0.55);
+      line-height: 1.5;
+      max-width: 260px;
+    }
+
+    .game-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 14px;
+      border-radius: 20px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-top: 6px;
+    }
+
+    .badge-card {
+      background: rgba(102, 126, 234, 0.2);
+      color: #667eea;
+      border: 1px solid rgba(102, 126, 234, 0.3);
+    }
+
+    .badge-reaction {
+      background: rgba(56, 239, 125, 0.2);
+      color: #38ef7d;
+      border: 1px solid rgba(56, 239, 125, 0.3);
+    }
+
+    .badge-chess {
+      background: rgba(247, 151, 30, 0.2);
+      color: #f7971e;
+      border: 1px solid rgba(247, 151, 30, 0.3);
+    }
+
+    .card-1:hover { border-color: rgba(102, 126, 234, 0.5); }
+    .card-2:hover { border-color: rgba(56, 239, 125, 0.5); }
+    .card-3:hover { border-color: rgba(247, 151, 30, 0.5); }
+
+    .launch-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 28px;
+      border: none;
+      border-radius: 12px;
+      font-size: 0.9rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.3s;
+      color: #1a1a2e;
+      margin-top: 8px;
+    }
+
+    .card-1 .launch-btn { background: linear-gradient(45deg, #667eea, #764ba2); color: #fff; }
+    .card-2 .launch-btn { background: linear-gradient(45deg, #11998e, #38ef7d); color: #fff; }
+    .card-3 .launch-btn { background: linear-gradient(45deg, #f7971e, #ffd200); color: #1a1a2e; }
+
+    .launch-btn:hover {
+      transform: scale(1.05);
+      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+    }
+
+    .launch-btn:active {
+      transform: scale(0.98);
+    }
+
+    .footer {
+      margin-top: 40px;
+      font-size: 0.8rem;
+      color: rgba(255, 255, 255, 0.2);
+      letter-spacing: 0.5px;
+    }
+
+    @media (max-width: 768px) {
+      .hub-title {
+        font-size: 2.2rem;
+      }
+
+      .games-grid {
+        grid-template-columns: 1fr;
+        gap: 20px;
+      }
+
+      .game-card {
+        padding: 30px 20px;
+      }
+
+      .game-icon {
+        font-size: 3rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <!-- Background particles -->
+  <div class="bg-particles" id="particles"></div>
+
+  <div class="container">
+    <h1 class="hub-title">🎮 Game Hub</h1>
+    <p class="hub-subtitle">Choose your challenge</p>
+
+    <div class="games-grid">
+      <!-- Card Memory Game -->
+      <a class="game-card card-1" href="./card/dist/index.html" target="_blank">
+        <div class="glow"></div>
+        <div class="game-icon">🃏</div>
+        <div class="game-name">Memory Match</div>
+        <div class="game-desc">
+          Flip cards and match pairs. Test your memory across multiple difficulty levels.
+        </div>
+        <div class="game-badge badge-card">🧠 Memory</div>
+        <button class="launch-btn" onclick="event.preventDefault(); window.open('./card/dist/index.html', '_blank')">
+          ▶ Play Now
+        </button>
+      </a>
+
+      <!-- Reaction Time Game -->
+      <a class="game-card card-2" href="./reaction-game/dist/index.html" target="_blank">
+        <div class="glow"></div>
+        <div class="game-icon">⚡</div>
+        <div class="game-name">Reaction Time</div>
+        <div class="game-desc">
+          Test your reflexes against random delays. Single player or head-to-head multiplayer.
+        </div>
+        <div class="game-badge badge-reaction">🏃 Reflexes</div>
+        <button class="launch-btn" onclick="event.preventDefault(); window.open('./reaction-game/dist/index.html', '_blank')">
+          ▶ Play Now
+        </button>
+      </a>
+
+      <!-- 3D Chess Game -->
+      <a class="game-card card-3" href="./time/dist/index.html" target="_blank">
+        <div class="glow"></div>
+        <div class="game-icon">♚</div>
+        <div class="game-name">3D Chess</div>
+        <div class="game-desc">
+          Full 3D chess with realistic pieces, legal move highlighting, and check/checkmate detection.
+        </div>
+        <div class="game-badge badge-chess">♜ Strategy</div>
+        <button class="launch-btn" onclick="event.preventDefault(); window.open('./time/dist/index.html', '_blank')">
+          ▶ Play Now
+        </button>
+      </a>
+    </div>
+
+    <div class="footer">
+      Built with React, Three.js & Vite
+    </div>
+  </div>
+
+  <script>
+    // Generate floating particles
+    const container = document.getElementById('particles');
+    for (let i = 0; i < 50; i++) {
+      const particle = document.createElement('div');
+      particle.className = 'particle';
+      particle.style.left = Math.random() * 100 + '%';
+      particle.style.width = (2 + Math.random() * 4) + 'px';
+      particle.style.height = particle.style.width;
+      particle.style.animationDuration = (10 + Math.random() * 20) + 's';
+      particle.style.animationDelay = (Math.random() * 20) + 's';
+      particle.style.opacity = 0.1 + Math.random() * 0.3;
+      container.appendChild(particle);
+    }
+  </script>
+</body>
+</html>

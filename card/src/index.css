@@ -1,0 +1,8 @@
+/* Minimal reset - all game styles are in App.css */
+body {
+  margin: 0;
+}
+
+#root {
+  min-height: 100vh;
+}
